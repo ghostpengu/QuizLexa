@@ -42,6 +42,9 @@ export default function QuizPage() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 gap-4">
       {/* Language Switcher */}
       <div className="flex gap-2 mb-4">
+        <p className="text-3xl font-bold">Quiz Español 🇪🇸</p>
+      </div>
+      <div className="flex gap-2 mb-4">
         {["en", "sk", "es"].map((l) => (
           <button
             key={l}
