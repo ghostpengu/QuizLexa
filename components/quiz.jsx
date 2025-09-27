@@ -50,6 +50,7 @@ export default function Quiz({
               onClick={() => handleAnswer(index)}
               className={`w-full justify-start text-left ${extraClasses}`}
               variant="outline"
+              disabled={showResult}
             >
               {option}
             </Button>
