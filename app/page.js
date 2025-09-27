@@ -1,57 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Quiz from "@/components/quiz";
 
-// Questions translated in 3 languages
-const questionsData = [
-  {
-    question: {
-      en: "What is the capital of France?",
-      sk: "Aké je hlavné mesto Francúzska?",
-      es: "¿Cuál es la capital de Francia?",
-    },
-    options: {
-      en: ["Berlin", "Madrid", "Paris", "Rome"],
-      sk: ["Berlín", "Madrid", "Paríž", "Rím"],
-      es: ["Berlín", "Madrid", "París", "Roma"],
-    },
-    correctIndex: 2,
-  },
-  {
-    question: {
-      en: "Which planet is known as the Red Planet?",
-      sk: "Ktorá planéta je známa ako Červená planéta?",
-      es: "¿Qué planeta es conocido como el Planeta Rojo?",
-    },
-    options: {
-      en: ["Venus", "Mars", "Jupiter", "Mercury"],
-      sk: ["Venuša", "Mars", "Jupiter", "Merkúr"],
-      es: ["Venus", "Marte", "Júpiter", "Mercurio"],
-    },
-    correctIndex: 1,
-  },
-  {
-    question: {
-      en: "What is the largest ocean on Earth?",
-      sk: "Aký je najväčší oceán na Zemi?",
-      es: "¿Cuál es el océano más grande de la Tierra?",
-    },
-    options: {
-      en: ["Atlantic", "Indian", "Arctic", "Pacific"],
-      sk: ["Atlantský", "Indický", "Severný ľadový", "Pacifický"],
-      es: ["Atlántico", "Índico", "Ártico", "Pacífico"],
-    },
-    correctIndex: 3,
-  },
-];
-
 export default function QuizPage() {
-  const [answers, setAnswers] = useState(
-    Array(questionsData.length).fill(null),
-  );
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState([]);
   const [showResult, setShowResult] = useState(false);
-  const [lang, setLang] = useState("en"); // default language
+  const [lang, setLang] = useState("en");
+
+  // Fetch questions from DB when page loads or language changes/ap
+  useEffect(() => {
+    async function fetchQuestions() {
+      const res = await fetch(`/api/questions?lang=${lang}`);
+      const data = await res.json();
+      setQuestions(data);
+      setAnswers(Array(data.length).fill(null));
+      setShowResult(false);
+    }
+    fetchQuestions();
+  }, [lang]);
 
   const handleAnswer = (index, choice) => {
     const newAnswers = [...answers];
@@ -63,13 +31,12 @@ export default function QuizPage() {
 
   const totalCorrect = answers.reduce(
     (acc, answer, idx) =>
-      answer === questionsData[idx].correctIndex ? acc + 1 : acc,
+      questions[idx] && answer === questions[idx].correctIndex ? acc + 1 : acc,
     0,
   );
-  const percentage =
-    questionsData.length > 0
-      ? Math.round((totalCorrect / questionsData.length) * 100)
-      : 0;
+  const percentage = questions.length
+    ? Math.round((totalCorrect / questions.length) * 100)
+    : 0;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 gap-4">
@@ -87,11 +54,11 @@ export default function QuizPage() {
       </div>
 
       {/* Render all questions */}
-      {questionsData.map((q, idx) => (
+      {questions.map((q, idx) => (
         <Quiz
-          key={idx}
-          question={q.question[lang]}
-          options={q.options[lang]}
+          key={q.id}
+          question={q.question}
+          options={q.options}
           correctIndex={q.correctIndex}
           selected={answers[idx]}
           onAnswer={(choice) => handleAnswer(idx, choice)}
@@ -113,7 +80,7 @@ export default function QuizPage() {
       {showResult && (
         <div className="text-lg font-medium mt-2">
           {lang === "en" ? "Score" : lang === "sk" ? "Skóre" : "Puntaje"}:{" "}
-          {totalCorrect}/{questionsData.length} ({percentage}%)
+          {totalCorrect}/{questions.length} ({percentage}%)
         </div>
       )}
     </main>
