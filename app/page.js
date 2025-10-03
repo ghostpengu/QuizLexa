@@ -7,7 +7,7 @@ export default function QuizPage() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [showResult, setShowResult] = useState(false);
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState("sk");
 
   // Fetch questions from DB when page loads or language changes/ap
   useEffect(() => {
